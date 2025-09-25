@@ -52,9 +52,9 @@ body {
 /* ==================== ROLETA ==================== */
 .roleta-wrapper {
     position: absolute;
-    top: 48.7%; /* controle vertical */
-    left: 50%;  /* controle horizontal */
-    transform: translate(-50%, -50%); /* centraliza inicialmente */
+    top: 48.7%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: var(--roleta-tamanho-desktop); 
     height: var(--roleta-tamanho-desktop);
     max-width: 415px;
@@ -71,7 +71,7 @@ canvas {
 /* ==================== SETA ==================== */
 .seta-container {
     position: absolute;
-    top: -15%; /* seta no topo */
+    top: -15%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 3;
@@ -83,7 +83,7 @@ canvas {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    transform: rotate(0deg); /* ✅ posição original */
+    transform: rotate(0deg);
     filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
     animation: pulsar 2s infinite ease-in-out;
 }
@@ -177,8 +177,12 @@ canvas {
     .roleta-wrapper {
         width: var(--roleta-tamanho-mobile);
         height: var(--roleta-tamanho-mobile);
-        max-width: 90vw;
-        max-height: 90vw;
+        max-width: 100vw;
+        max-height: 100vw;
+    }
+    .container {
+        min-height: 90vh;
+        max-width: 95vw;
     }
 }
 </style>
@@ -228,6 +232,10 @@ const raio = canvas.width / 2;
 let anguloAtual = 0;
 let animacaoRodando = false;
 
+// Imagem de fundo das paletas
+const imgFundoPaleta = new Image();
+imgFundoPaleta.src = "assets/fundopaleta.png";
+
 const imagensPremios = configuracoes.premios.map(p => {
     const img = new Image();
     img.src = p.img;
@@ -242,13 +250,28 @@ function desenharRoleta() {
         const inicio = anguloAtual + i * anguloFatia;
         const fim = inicio + anguloFatia;
 
-        ctx.beginPath();
-        ctx.moveTo(raio, raio);
-        ctx.arc(raio, raio, raio - 8, inicio, fim);
-        ctx.closePath();
-        ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#515151";
-        ctx.fill();
+        // Desenha a paleta usando a imagem de fundo
+        if (imgFundoPaleta.complete) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(raio, raio);
+            ctx.arc(raio, raio, raio - 8, inicio, fim);
+            ctx.closePath();
+            ctx.clip();
 
+            // Ajusta tamanho da imagem para cobrir toda a fatia
+            ctx.drawImage(imgFundoPaleta, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(raio, raio);
+            ctx.arc(raio, raio, raio - 8, inicio, fim);
+            ctx.closePath();
+            ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#515151";
+            ctx.fill();
+        }
+
+        // Contorno
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -256,6 +279,7 @@ function desenharRoleta() {
         ctx.lineTo(raio + Math.cos(inicio) * (raio - 8), raio + Math.sin(inicio) * (raio - 8));
         ctx.stroke();
 
+        // Imagem do prêmio
         const img = imagensPremios[i];
         if (img.complete) {
             const anguloMeio = inicio + anguloFatia / 2;
@@ -267,6 +291,7 @@ function desenharRoleta() {
         }
     });
 
+    // Botão central
     ctx.beginPath();
     ctx.arc(raio, raio, 55, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
@@ -315,6 +340,7 @@ function finalizarAnimacao(erro = false){
 
 girarBtn.addEventListener("click", girarRoleta);
 imagensPremios.forEach(img => img.onload = desenharRoleta);
+imgFundoPaleta.onload = desenharRoleta;
 desenharRoleta();
 </script>
 </body>
