@@ -85,7 +85,19 @@ canvas {
     object-fit: contain;
     transform: rotate(0deg);
     filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
-    animation: pulsar 2s infinite ease-in-out;
+}
+
+/* Animação da seta “bate” durante o giro */
+.seta.bate {
+    animation: bateSeta 0.15s infinite;
+}
+
+@keyframes bateSeta {
+    0% { transform: translateX(-50%) rotate(0deg); }
+    25% { transform: translateX(-50%) rotate(10deg); }
+    50% { transform: translateX(-50%) rotate(0deg); }
+    75% { transform: translateX(-50%) rotate(-10deg); }
+    100% { transform: translateX(-50%) rotate(0deg); }
 }
 
 /* ==================== BOTÃO CENTRAL ==================== */
@@ -232,6 +244,9 @@ const raio = canvas.width / 2;
 let anguloAtual = 0;
 let animacaoRodando = false;
 
+// Seta
+const seta = document.querySelector(".seta");
+
 // Imagem de fundo das paletas
 const imgFundoPaleta = new Image();
 imgFundoPaleta.src = "assets/fundopaleta.png";
@@ -302,6 +317,9 @@ async function girarRoleta() {
     if (animacaoRodando) return;
     animacaoRodando = true;
 
+    // Ativa efeito da seta
+    seta.classList.add("bate");
+
     const data = { success: true, indice: Math.floor(Math.random() * configuracoes.premios.length) };
 
     if (data.success) {
@@ -335,6 +353,8 @@ async function girarRoleta() {
 
 function finalizarAnimacao(erro = false){
     animacaoRodando = false;
+    // Remove efeito da seta
+    seta.classList.remove("bate");
     if (!erro) popup.classList.add("show");
 }
 
@@ -345,22 +365,3 @@ desenharRoleta();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
