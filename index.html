@@ -73,17 +73,6 @@ canvas {
     transform: rotate(0deg);
     filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
 }
-/* Animação da seta bate durante o giro */
-.seta.bate {
-    animation: bateSeta 0.15s infinite linear;
-}
-@keyframes bateSeta {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(10deg); }
-    50% { transform: rotate(0deg); }
-    75% { transform: rotate(-10deg); }
-    100% { transform: rotate(0deg); }
-}
 .botao-central {
     position: absolute;
     top: 50%;
@@ -203,6 +192,7 @@ const configuracoes = {
     duracaoAnimacao: 8000,
     voltasRoleta: 20
 };
+
 const canvas = document.getElementById("roleta");
 const ctx = canvas.getContext("2d");
 const popup = document.getElementById("popup");
@@ -210,16 +200,20 @@ const girarBtn = document.getElementById("girar-btn");
 const raio = canvas.width / 2;
 let anguloAtual = 0;
 let animacaoRodando = false;
+
 const seta = document.querySelector(".seta");
 const imgFundoPaleta = new Image();
 imgFundoPaleta.src = "assets/fundopaleta.png";
 const imagensPremios = configuracoes.premios.map(p => { const img = new Image(); img.src = p.img; return img; });
+
 function desenharRoleta() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const anguloFatia = (2 * Math.PI) / configuracoes.premios.length;
+
     configuracoes.premios.forEach((premio, i) => {
         const inicio = anguloAtual + i * anguloFatia;
         const fim = inicio + anguloFatia;
+
         if (imgFundoPaleta.complete) {
             ctx.save();
             ctx.beginPath();
@@ -237,12 +231,14 @@ function desenharRoleta() {
             ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#515151";
             ctx.fill();
         }
+
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(raio, raio);
         ctx.lineTo(raio + Math.cos(inicio) * (raio - 8), raio + Math.sin(inicio) * (raio - 8));
         ctx.stroke();
+
         const img = imagensPremios[i];
         if (img.complete) {
             const anguloMeio = inicio + anguloFatia / 2;
@@ -253,15 +249,17 @@ function desenharRoleta() {
             ctx.drawImage(img, x, y, tamanho, tamanho);
         }
     });
+
     ctx.beginPath();
     ctx.arc(raio, raio, 55, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
     ctx.fill();
 }
+
 async function girarRoleta() {
     if (animacaoRodando) return;
     animacaoRodando = true;
-    seta.classList.add("bate");
+
     const data = { success: true, indice: Math.floor(Math.random() * configuracoes.premios.length) };
     if (data.success) {
         configuracoes.premioSorteado = data.indice;
@@ -270,18 +268,29 @@ async function girarRoleta() {
         let anguloAlvo = anguloPonteiro - (configuracoes.premioSorteado * anguloFatia + anguloFatia / 2);
         while (anguloAlvo < 0) anguloAlvo += 2 * Math.PI;
         while (anguloAlvo >= 2 * Math.PI) anguloAlvo -= 2 * Math.PI;
+
         const anguloFinal = (2 * Math.PI * configuracoes.voltasRoleta) + anguloAlvo;
         const duracao = configuracoes.duracaoAnimacao;
         let inicioTempo = null;
+
         function animar(timestamp) {
             if (!inicioTempo) inicioTempo = timestamp;
             let progresso = (timestamp - inicioTempo) / duracao;
             if (progresso >= 1) progresso = 1;
+
             const ease = 1 - Math.pow(1 - progresso, 5);
             anguloAtual = ease * anguloFinal;
             desenharRoleta();
+
+            // Efeito bate da seta sincronizado
+            const maxBate = 10 * Math.PI / 180; // 10 graus em rad
+            seta.style.transform = `rotate(${Math.sin(progresso * Math.PI * 4) * maxBate}rad)`;
+
             if (progresso < 1) requestAnimationFrame(animar);
-            else finalizarAnimacao();
+            else {
+                seta.style.transform = `rotate(0deg)`; // garante que a seta pare
+                finalizarAnimacao();
+            }
         }
         requestAnimationFrame(animar);
     } else {
@@ -289,12 +298,12 @@ async function girarRoleta() {
         finalizarAnimacao(true);
     }
 }
+
 function finalizarAnimacao(erro = false){
     animacaoRodando = false;
-    // ✅ seta para imediatamente
-    seta.classList.remove("bate");
     if (!erro) popup.classList.add("show");
 }
+
 girarBtn.addEventListener("click", girarRoleta);
 imagensPremios.forEach(img => img.onload = desenharRoleta);
 imgFundoPaleta.onload = desenharRoleta;
