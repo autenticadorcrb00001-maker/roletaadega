@@ -7,20 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Product+Sans&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ==================== VARIÁVEIS ==================== */
 :root {
-    --roleta-tamanho-desktop: 80vmin; /* Tamanho padrão desktop */
-    --roleta-tamanho-mobile: 95vmin;  /* Tamanho exclusivo mobile */
+    --roleta-tamanho-desktop: 80vmin;
+    --roleta-tamanho-mobile: 95vmin;
 }
-
-/* ==================== RESET ==================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-
-/* ==================== BODY ==================== */
 body {
     font-family: 'Roboto', Arial, sans-serif;
     background-color: #401b00;
@@ -30,10 +25,8 @@ body {
     align-items: center;
     min-height: 100vh;
 }
-
-/* ==================== CONTAINER ==================== */
 .container {
-    background-image: url('assets/fundotela016.png'); /* ✅ fundo restaurado */
+    background-image: url('assets/fundotela016.png');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -48,8 +41,6 @@ body {
     position: relative;
     overflow: hidden;
 }
-
-/* ==================== ROLETA ==================== */
 .roleta-wrapper {
     position: absolute;
     top: 48.7%;
@@ -60,15 +51,12 @@ body {
     max-width: 405px;
     max-height: 405px;
 }
-
 canvas {
     display: block;
     border-radius: 50%;
     width: 100%;
     height: 100%;
 }
-
-/* ==================== SETA ==================== */
 .seta-container {
     position: absolute;
     top: -10%;
@@ -78,7 +66,6 @@ canvas {
     width: 85px;
     height: 85px;
 }
-
 .seta {
     width: 100%;
     height: 100%;
@@ -86,21 +73,17 @@ canvas {
     transform: rotate(0deg);
     filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
 }
-
-/* Animação da seta “bate” durante o giro */
+/* Animação da seta bate durante o giro */
 .seta.bate {
-    animation: bateSeta 0.15s infinite;
+    animation: bateSeta 0.15s infinite linear;
 }
-
 @keyframes bateSeta {
-    0% { transform: translateX(-50%) rotate(0deg); }
-    25% { transform: translateX(-50%) rotate(10deg); }
-    50% { transform: translateX(-50%) rotate(0deg); }
-    75% { transform: translateX(-50%) rotate(-10deg); }
-    100% { transform: translateX(-50%) rotate(0deg); }
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
 }
-
-/* ==================== BOTÃO CENTRAL ==================== */
 .botao-central {
     position: absolute;
     top: 50%;
@@ -117,15 +100,12 @@ canvas {
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
     cursor: pointer;
 }
-
 .botao-central img {
     width: 190%;
     height: 190%;
     object-fit: contain;
     pointer-events: none;
 }
-
-/* ==================== POPUP ==================== */
 .popup {
     position: fixed;
     top: 50%;
@@ -144,23 +124,19 @@ canvas {
     border: 3px solid #fff;
     font-family: 'Product Sans', 'Roboto', Arial, sans-serif;
 }
-
 .popup.show {
     transform: translate(-50%, -50%) scale(1);
 }
-
 .popup h2 {
     font-weight: 700;
     font-size: 22px;
     margin-bottom: 12px;
 }
-
 .popup p {
     font-size: 20px;
     margin-bottom: 20px;
     line-height: 1.5;
 }
-
 .whatsapp-btn {
     display: inline-block;
     background: #25D366;
@@ -172,19 +148,14 @@ canvas {
     text-decoration: none;
     transition: background 0.3s ease;
 }
-
 .whatsapp-btn:hover {
     background: #1ebe57;
 }
-
-/* ==================== ANIMAÇÕES ==================== */
 @keyframes pulsar {
     0% { transform: scale(1); }
     50% { transform: scale(1.15); }
     100% { transform: scale(1); }
 }
-
-/* ==================== MOBILE ==================== */
 @media (max-width: 800px) {
     .roleta-wrapper {
         width: var(--roleta-tamanho-mobile);
@@ -211,14 +182,11 @@ canvas {
         </div>
     </div>
 </div>
-
-<!-- Popup -->
 <div class="popup" id="popup">
     <h2>Parabéns! 🎉</h2>
     <p>💰 Ganhe o dobro da diversão! Você recebeu um <strong>cupom no mesmo valor</strong> da sua última compra.</p>
     <a class="whatsapp-btn" href="https://wa.me/SEUNUMERO" target="_blank">📱 Receber seu Cupom</a>
 </div>
-
 <script>
 const configuracoes = {
     premios: [
@@ -235,7 +203,6 @@ const configuracoes = {
     duracaoAnimacao: 8000,
     voltasRoleta: 20
 };
-
 const canvas = document.getElementById("roleta");
 const ctx = canvas.getContext("2d");
 const popup = document.getElementById("popup");
@@ -243,29 +210,16 @@ const girarBtn = document.getElementById("girar-btn");
 const raio = canvas.width / 2;
 let anguloAtual = 0;
 let animacaoRodando = false;
-
-// Seta
 const seta = document.querySelector(".seta");
-
-// Imagem de fundo das paletas
 const imgFundoPaleta = new Image();
 imgFundoPaleta.src = "assets/fundopaleta.png";
-
-const imagensPremios = configuracoes.premios.map(p => {
-    const img = new Image();
-    img.src = p.img;
-    return img;
-});
-
+const imagensPremios = configuracoes.premios.map(p => { const img = new Image(); img.src = p.img; return img; });
 function desenharRoleta() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const anguloFatia = (2 * Math.PI) / configuracoes.premios.length;
-
     configuracoes.premios.forEach((premio, i) => {
         const inicio = anguloAtual + i * anguloFatia;
         const fim = inicio + anguloFatia;
-
-        // Desenha a paleta usando a imagem de fundo
         if (imgFundoPaleta.complete) {
             ctx.save();
             ctx.beginPath();
@@ -273,8 +227,6 @@ function desenharRoleta() {
             ctx.arc(raio, raio, raio - 8, inicio, fim);
             ctx.closePath();
             ctx.clip();
-
-            // Ajusta tamanho da imagem para cobrir toda a fatia
             ctx.drawImage(imgFundoPaleta, 0, 0, canvas.width, canvas.height);
             ctx.restore();
         } else {
@@ -285,16 +237,12 @@ function desenharRoleta() {
             ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#515151";
             ctx.fill();
         }
-
-        // Contorno
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(raio, raio);
         ctx.lineTo(raio + Math.cos(inicio) * (raio - 8), raio + Math.sin(inicio) * (raio - 8));
         ctx.stroke();
-
-        // Imagem do prêmio
         const img = imagensPremios[i];
         if (img.complete) {
             const anguloMeio = inicio + anguloFatia / 2;
@@ -305,23 +253,16 @@ function desenharRoleta() {
             ctx.drawImage(img, x, y, tamanho, tamanho);
         }
     });
-
-    // Botão central
     ctx.beginPath();
     ctx.arc(raio, raio, 55, 0, 2 * Math.PI);
     ctx.fillStyle = "#fff";
     ctx.fill();
 }
-
 async function girarRoleta() {
     if (animacaoRodando) return;
     animacaoRodando = true;
-
-    // Ativa efeito da seta
     seta.classList.add("bate");
-
     const data = { success: true, indice: Math.floor(Math.random() * configuracoes.premios.length) };
-
     if (data.success) {
         configuracoes.premioSorteado = data.indice;
         const anguloFatia = (2 * Math.PI) / configuracoes.premios.length;
@@ -329,35 +270,29 @@ async function girarRoleta() {
         let anguloAlvo = anguloPonteiro - (configuracoes.premioSorteado * anguloFatia + anguloFatia / 2);
         while (anguloAlvo < 0) anguloAlvo += 2 * Math.PI;
         while (anguloAlvo >= 2 * Math.PI) anguloAlvo -= 2 * Math.PI;
-
         const anguloFinal = (2 * Math.PI * configuracoes.voltasRoleta) + anguloAlvo;
         const duracao = configuracoes.duracaoAnimacao;
         let inicioTempo = null;
-
         function animar(timestamp) {
             if (!inicioTempo) inicioTempo = timestamp;
             const progresso = (timestamp - inicioTempo) / duracao;
-            const ease = 1 - Math.pow(1 - progresso, 5);
+            const ease = progresso < 1 ? 1 - Math.pow(1 - progresso, 5) : 1;
             anguloAtual = ease * anguloFinal;
             desenharRoleta();
             if (progresso < 1) requestAnimationFrame(animar);
             else finalizarAnimacao();
         }
-
         requestAnimationFrame(animar);
     } else {
         alert('Erro ao girar a roleta.');
         finalizarAnimacao(true);
     }
 }
-
 function finalizarAnimacao(erro = false){
     animacaoRodando = false;
-    // Remove efeito da seta
     seta.classList.remove("bate");
     if (!erro) popup.classList.add("show");
 }
-
 girarBtn.addEventListener("click", girarRoleta);
 imagensPremios.forEach(img => img.onload = desenharRoleta);
 imgFundoPaleta.onload = desenharRoleta;
